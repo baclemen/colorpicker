@@ -8,8 +8,9 @@ var dimx = 500;
 var dimy = 500;
 var imgData = ctx.createImageData(dimx, dimy);
 selectedcolor = 0;
+var RGBcolor;
 initColorPicker();
-setColor(hslToRgb(.5,.5,.5),1);
+initColorChanger();
 
 
 for(var i = 0; i < dimx; i += 1){
@@ -32,13 +33,59 @@ for(var i = 0; i < dimx; i += 1){
 ctx.putImageData(imgData, 0, 0);
 
 
+function initColorPicker(){
+
+    mouseflag = false;
+
+    var canvasEl = document.getElementById('myCanvas');
+    var canvasContext = canvasEl.getContext('2d');
+
+    canvasEl.onmousedown = function(mouseEvent) {
+        mouseflag = true;
+        //console.log(mouseflag);
+    }
+    canvasEl.onmouseup = function(mouseEvent) {
+        mouseflag = false;
+        //console.log(mouseflag);
+    }
+    canvasEl.onmousemove = function(mouseEvent){
+        if(mouseflag){
+            var imgData = canvasContext.getImageData(mouseEvent.offsetX, mouseEvent.offsetY, 1, 1);
+            var rgba = imgData.data;
+
+            setColor(rgba, selectedcolor);
+
+            //alert("rgba(" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ", " + rgba[3] + ")");
+            }
+        }
+}
+
+function initColorChanger(){
+    for(var i = 0; i < 5; i++){
+        str = "color" + i
+        var palel = document.getElementById(str);
+        palel.onclick = palelclick
+        
+        function palelclick(event){
+            
+            num = event.srcElement.id.match(/\d+/)[0];
+            selectedcolor = num; 
+            // console.log("lel");
+            
+        }
+    }
+}
+
+
 function setColor(rgbcolor, number){
     str = "color" + number;
-    console.log(str);
+    //console.log(str);
     var el = document.getElementById("color"+number);
+    //console.log(el)
 
     var cctx = el.getContext("2d");
     var colData = cctx.createImageData(80,80);
+    RGBcolor = rgbcolor;
 
     for(var i = 0; i < colData.data.length; i+=4){
         colData.data[i + 0] = rgbcolor[0];
@@ -50,22 +97,6 @@ function setColor(rgbcolor, number){
 }
 
 
-
-function initColorPicker()
-{
-    var canvasEl = document.getElementById('myCanvas');
-    var canvasContext = canvasEl.getContext('2d');
-
-    canvasEl.onclick = function(mouseEvent) 
-    {
-      var imgData = canvasContext.getImageData(mouseEvent.offsetX, mouseEvent.offsetY, 1, 1);
-      var rgba = imgData.data;
-
-      setColor(rgba, selectedcolor);
-
-      //alert("rgba(" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ", " + rgba[3] + ")");
-    }
-}
 
 
 
