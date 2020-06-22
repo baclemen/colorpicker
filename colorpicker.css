@@ -1,0 +1,9 @@
+[id="myCanvas"]{
+    border: 1px solid #000000
+}
+[class="colors"]{
+    border: 1px solid #000000;
+    border-radius: 50%;
+    display: inline-block;
+    margin: 8px;
+}
