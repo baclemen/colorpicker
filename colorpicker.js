@@ -11,26 +11,35 @@ selectedcolor = 0;
 var RGBcolor;
 initColorPicker();
 initColorChanger();
+var sliderVal = 1;
+drawboard();
 
 
-for(var i = 0; i < dimx; i += 1){
-    for (j = 0; j < dimy; j += 1) {
-        pos = j * dimx * 4 + i * 4;
+function drawboard(){
+    var s;
+    for(var i = 0; i < dimx; i += 1){
+        for (j = 0; j < dimy; j += 1) {
+            pos = j * dimx * 4 + i * 4;
 
-        var h = i/dimx;
-        var s = 1;
-        var l = j/dimy;
+            var h = i/dimx;
+            s = sliderVal;
+            var l = j/dimy;
 
-        var rgb = hslToRgb(h,s,l);
 
-        imgData.data[pos + 0] = rgb[0];
-        imgData.data[pos + 1] = rgb[1];
-        imgData.data[pos + 2] = rgb[2];
-        imgData.data[pos + 3] = 255;
+            var rgb = hslToRgb(h,s,l);
+
+            imgData.data[pos + 0] = rgb[0];
+            imgData.data[pos + 1] = rgb[1];
+            imgData.data[pos + 2] = rgb[2];
+            imgData.data[pos + 3] = 255;
+        }
     }
+    console.log(s)
+
+    ctx.putImageData(imgData, 0, 0);
 }
 
-ctx.putImageData(imgData, 0, 0);
+
 
 
 function initColorPicker(){
@@ -48,12 +57,29 @@ function initColorPicker(){
         mouseflag = false;
         //console.log(mouseflag);
     }
-    canvasEl.onmousemove = function(mouseEvent){
+    canvasEl.onmousemove = mousehandler;
+    
+    function mousehandler(mouseEvent){
         if(mouseflag){
+
+            drawboard();
+
             var imgData = canvasContext.getImageData(mouseEvent.offsetX, mouseEvent.offsetY, 1, 1);
             var rgba = imgData.data;
 
             setColor(rgba, selectedcolor);
+
+            console.log("x" + mouseEvent.offsetX);
+            console.log("y" + mouseEvent.offsetY);
+
+
+            ctx.beginPath();
+            ctx.arc(mouseEvent.offsetX , mouseEvent.offsetY -30, 15, 0, 2 * Math.PI, false);
+            ctx.fillStyle = "rgb("+ rgba[0] + "," + rgba[1] + "," + rgba[2] + ")";
+            ctx.fill();
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = '#003300';
+            ctx.stroke();
 
             //alert("rgba(" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ", " + rgba[3] + ")");
             }
@@ -67,9 +93,16 @@ function initColorChanger(){
         palel.onclick = palelclick
         
         function palelclick(event){
+            for(var i = 0;i<5; i++){
+                x = document.getElementById("color" + i);
+                x.style.border = "1px solid #000000";
+            }
+
             
             num = event.srcElement.id.match(/\d+/)[0];
             selectedcolor = num; 
+            x = document.getElementById("color" + num)
+            x.style.border = "5px solid #000000"
             // console.log("lel");
             
         }
@@ -97,7 +130,13 @@ function setColor(rgbcolor, number){
 }
 
 
-
+function updateSlider(slideAmount){
+    var sliderDiv = document.getElementById("sliderAmount");
+    sliderVal = slideAmount/100;
+    //console.log(sliderVal);
+    drawboard();
+    //console.log(slideAmount);
+}
 
 
 
@@ -136,3 +175,8 @@ function hslToRgb(h, s, l){
 
     return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
 }
+
+circlesvg = `<svg height="100" width="100">
+<circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" />
+</svg>`
+

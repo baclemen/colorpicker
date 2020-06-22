@@ -1,7 +1,10 @@
 <html>
     <head>
     </head>
-    <div>
+    <div id="colorpickercontainer">
+
+        <input type="range" min="0" max="100" value="100" class="slider" id="topslider" oninput="updateSlider(this.value)">
+
         <canvas id="myCanvas" width="500" height="500"></canvas>
         <br>
         <canvas class="colors" id="color0" width="80" height="80"></canvas>
