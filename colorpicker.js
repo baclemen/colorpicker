@@ -13,6 +13,10 @@ initColorPicker();
 initColorChanger();
 var sliderVal = 1;
 drawboard();
+var mouseflag;
+initMouseFlag();
+var mousedownon = -1;
+//logMouseDown();
 
 
 function drawboard(){
@@ -34,7 +38,6 @@ function drawboard(){
             imgData.data[pos + 3] = 255;
         }
     }
-    console.log(s)
 
     ctx.putImageData(imgData, 0, 0);
 }
@@ -44,19 +47,10 @@ function drawboard(){
 
 function initColorPicker(){
 
-    mouseflag = false;
-
     var canvasEl = document.getElementById('myCanvas');
     var canvasContext = canvasEl.getContext('2d');
 
-    canvasEl.onmousedown = function(mouseEvent) {
-        mouseflag = true;
-        //console.log(mouseflag);
-    }
-    canvasEl.onmouseup = function(mouseEvent) {
-        mouseflag = false;
-        //console.log(mouseflag);
-    }
+
     canvasEl.onmousemove = mousehandler;
     
     function mousehandler(mouseEvent){
@@ -69,8 +63,8 @@ function initColorPicker(){
 
             setColor(rgba, selectedcolor);
 
-            console.log("x" + mouseEvent.offsetX);
-            console.log("y" + mouseEvent.offsetY);
+            //console.log("x" + mouseEvent.offsetX);
+            //console.log("y" + mouseEvent.offsetY);
 
 
             ctx.beginPath();
@@ -136,6 +130,30 @@ function updateSlider(slideAmount){
     //console.log(sliderVal);
     drawboard();
     //console.log(slideAmount);
+}
+
+function initMouseFlag(){
+    
+document.onmousedown = function(mouseEvent) {
+    mouseflag = true;
+
+    //console.log(mouseflag);
+
+    logEl = mouseEvent.srcElement.id;
+    console.log(mouseEvent);
+    console.log(logEl.substring(0,5));
+
+    if(logEl.substring(0,5) == "color"){
+        console.log("logged");
+        mousedownon = logEl.match(/\d+/)[0];
+    }
+    else{}
+}
+document.onmouseup = function(mouseEvent) {
+    mouseflag = false;
+    console.log(mouseflag);
+    mousedownon = -1;
+}
 }
 
 
