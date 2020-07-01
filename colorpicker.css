@@ -18,7 +18,7 @@
 }
 
 #colorscontainer{
-    position: absolute;
+    position: relative;
 }
 
 [class="colors"]{
@@ -45,4 +45,8 @@
   
   .slider:hover[id="topslider"] {
     opacity: 1;
+  }
+  #blender{
+      position: relative;
+
   }

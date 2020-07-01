@@ -27,6 +27,8 @@ var ctx = c.getContext("2d");
 var dimx = 500;
 var dimy = 500;
 var heightslider = 25;
+var heightcolors = 88.5;
+var heightblender = 50;
 var imgData = ctx.createImageData(dimx, dimy);
 selectedcolor = 0;
 var RGBcolor;
@@ -39,8 +41,16 @@ drawboard();
 var mouseflag;
 initMouseFlag();
 var mousedownon = -1;
-var colors = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
+var colors = [[255, 0, 0], [0, 255, 0], [0, 0, 255], [0, 0, 0], [255, 255, 255]];
 penstartctx =  -1;
+initsetcolors();
+
+function initsetcolors(){
+    for(var i = 0; i < colors.length; i++){
+        setColor(colors[i],i)
+    }
+    chooseColor(0);
+}
 
 
 
@@ -148,16 +158,14 @@ function startdrawing(event){
         penstartctx = 1;
         var imgData = ctx.getImageData(event.offsetX, event.offsetY - heightslider, 1, 1);
         var rgba = imgData.data;
-        setColor(rgba, selectedcolor);
     }
-    else if(traceel.y < 603.5 -25 + heightslider){
+    else if(traceel.y < heightslider + dimy + heightcolors){
         penstartctx = 2
     }
-    else{
+    else if(traceel.y < heightslider + dimy + heightcolors + heightblender){
         penstartctx = 3
     }
-
-
+    console.log(penstartctx)
 }
 
 function enddrawing(event){
@@ -165,7 +173,7 @@ function enddrawing(event){
     //console.log(e.pressure)
     drawcanvas.removeEventListener("pointermove", logpointer);
     console.log(pointertrace)
-    if(penstartctx ==1){
+    if(penstartctx == 1){
         if(isPolygon(pointertrace) && !zoomed){
             console.log(penstartctx)
             pts = getsquarepoints(pointertrace)
@@ -188,13 +196,11 @@ function enddrawing(event){
 
             pickercontext = newpickercontext;
             drawboard();
-            zoomed = 1;
+            zoomed = true;
         }
         else if (zoomed){
 
             var count = 0;
-
-            console.log(pointertrace.length)
 
             for(var i = 0; i < zoomtrace.length - 2; i++){
                 for(var j = 0; j < pointertrace.length - 2; j++){
@@ -207,25 +213,56 @@ function enddrawing(event){
             if(count > 2){
                 pickercontext = defaultpickercontext;
                 drawboard();
-                drawctx.clearRect(0, 0, drawcanvas.width, drawcanvas.height);
                 zoomed = false;
             }
 
             else{
-                drawctx.clearRect(0, 0, drawcanvas.width, drawcanvas.height);
-                drawpolygon(zoomtrace);
+                selectColorIfOnBoard(pointertrace[pointertrace.length - 1])
             }
 
         }
         else {
-            drawctx.clearRect(0, 0, drawcanvas.width, drawcanvas.height);
+            selectColorIfOnBoard(pointertrace[pointertrace.length - 1])
         }
     }
     else if (penstartctx == 2){
+        pendown = eventOn(pointertrace[0]);
+        penup = eventOn(pointertrace[pointertrace.length-1]);
+        
+        if(penup == pendown){
+            chooseColor(penup)
+        }
+
+        else if (Math.min(penup,pendown) >=0){
+            console.log("blend")
+            setBlender(colors[pendown], colors[penup])
+        }
+        else if (pendown >=0 && penup == -1){
+            lastel = pointertrace[pointertrace.length-1];
+            if(lastel.y >= heightslider && lastel.y <= heightslider + dimx && lastel.x >= 0 && lastel.x <= dimy){
+                var imgData = ctx.getImageData(event.offsetX, event.offsetY - heightslider, 1, 1);
+                var rgb = imgData.data;
+                setBlender(colors[pendown],rgb);
+            }
+            else if (lastel.y >= heightslider + dimx + heightcolors && lastel.y <= heightslider + dimx + heightcolors + heightblender && lastel.x >= 0 && lastel.x <= dimy){
+                console.log("here")
+                blender = document.getElementById("blender");
+                bctx = blender.getContext('2d');
+                var imgData = bctx.getImageData(event.offsetX, event.offsetY - heightslider - dimy - heightcolors, 1, 1);
+                var rgb = imgData.data
+                setBlender(colors.pendown,rgb);
+            }
+        }
+
         
     }
 
+    else if (penstartctx == 3){
+        selectColorIfOnBoard(pointertrace[pointertrace.length - 1])
+    }
+
     //interprettrace()
+    clearboard();
 
     pointertrace = [];
     //drawctx.clearRect(0, 0, canvel.width, canvel.height);
@@ -242,15 +279,17 @@ function logpointer(event){
         if(traceel.x - lastel.x != 0){
         updateSlider(traceel.x/5)
         }
-    } else if (penstartctx == 1){
-        var imgData = ctx.getImageData(event.offsetX, event.offsetY - heightslider, 1, 1);
-        var rgba = imgData.data;
-        setColor(rgba, selectedcolor);
-
+    } else {
         drawctx.beginPath();
         drawctx.moveTo(lastel.x, lastel.y);
         drawctx.lineTo(traceel.x, traceel.y);
         drawctx.stroke(); 
+
+        if (penstartctx == 1){
+            var imgData = ctx.getImageData(event.offsetX, event.offsetY - heightslider, 1, 1);
+            var rgba = imgData.data;
+        }
+
     } 
 
     pointerpos = traceel;
@@ -260,6 +299,7 @@ function logpointer(event){
 
 
 function setColor(rgbcolor, number) {
+    colors[number] = rgbcolor;
     str = "color" + number;
     //console.log(str);
     var el = document.getElementById("color" + number);
@@ -312,6 +352,31 @@ function setSlider(rgbcolor){
     topsliderctx.putImageData(sliderImgData, 0, 0);
 }
 
+function clearboard(){
+    drawctx.clearRect(0, 0, drawcanvas.width, drawcanvas.height);
+    if(zoomed){
+        drawpolygon(zoomtrace);
+    }
+}
+
+function selectColorIfOnBoard(coordinates){
+    lastel = coordinates
+    if(lastel.y >= heightslider && lastel.y <= heightslider + dimx && lastel.x >= 0 && lastel.x <= dimy){
+        var imgData = ctx.getImageData(event.offsetX, event.offsetY - heightslider, 1, 1);
+        var rgb = imgData.data
+        setColor(rgb, selectedcolor)
+    }
+    else if (lastel.y >= heightslider + dimx + heightcolors && lastel.y <= heightslider + dimx + heightcolors + heightblender && lastel.x >= 0 && lastel.x <= dimy){
+        console.log("here")
+        blender = document.getElementById("blender");
+        bctx = blender.getContext('2d');
+        var imgData = bctx.getImageData(event.offsetX, event.offsetY - heightslider - dimy - heightcolors, 1, 1);
+        var rgb = imgData.data
+        setColor(rgb, selectedcolor)
+    }
+
+}
+
 function setBlender(color1, color2) {
     blender = document.getElementById("blender");
     bctx = blender.getContext('2d');
@@ -323,8 +388,6 @@ function setBlender(color1, color2) {
     for (var i = 0; i < dimx; i++) {
 
         colorRGB = linearRGBBlending(color1, color2, (dimx - i) / dimx);
-        console.log(colorRGB);
-        console.log((dimx - i) / dimx);
 
 
         for (var j = 0; j < 50; j++) {
@@ -388,6 +451,17 @@ function initMouseFlag() {
     }
 }
 
+function chooseColor(number){
+    for (var i = 0; i < 5; i++) {
+        x = document.getElementById("color" + i);
+        x.style.border = "1px solid #000000";
+    }
+
+    selectedcolor = number;
+    var x = document.getElementById("color" + number);
+    x.style.border = "5px solid #000000";
+}
+
 
 function drawpolygon(trace){
 
@@ -406,6 +480,22 @@ function drawpolygon(trace){
 
 
 //pointertrace analysis
+
+function eventOn(coordinates){
+    for(var i = 0; i < 5; i++){
+        x = document.getElementById("color" + i);
+        pos = x.getBoundingClientRect();
+
+        middle = {x: pos.x + pos.width * .5, y: pos.y + pos.height * .5}
+        
+        if(absdifp(coordinates,middle) < pos.width / 2){
+            return i;
+        }
+
+    }
+
+    return -1;
+}
 
 function isPolygon(trace){
     if(typeof trace ==='undefined' || trace.length == 0){
