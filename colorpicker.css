@@ -1,12 +1,28 @@
-[id="myCanvas"]{
-    border: 0px solid #000000
+#drawcanvas{
+    position: absolute;
+    z-index: 10;
+    touch-action: none;
+}
+
+#myCanvas{
+    touch-action: none;
+    position: relative;
+    border: 0px solid #000000;
+    width: 500px;
+    height: 500px;
 }
 
 [id="colorpickercontainer"]{
+    position: absolute;
     width: 600px;
 }
 
+#colorscontainer{
+    position: absolute;
+}
+
 [class="colors"]{
+    position: relative;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
@@ -16,7 +32,7 @@
     margin: 7.5px;
 }
 
-.slider[id="topslider"] {
+#topslider {
     -webkit-appearance: none;
     width: 500px;
     height: 25px;

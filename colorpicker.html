@@ -1,19 +1,27 @@
 <html>
-    <head>
-    </head>
-    <div id="colorpickercontainer">
 
-        <input type="range" min="0" max="100" value="100" class="slider" id="topslider" oninput="updateSlider(this.value)">
+<head>
+</head>
+<canvas id="drawcanvas" width="500" height="700">
+</canvas>
+<div id="colorpickercontainer">
 
-        <canvas id="myCanvas" width="500" height="500"></canvas>
-        <br>
+    <canvas id="topslider" width="500" height="25"></canvas>
+
+    <canvas id="myCanvas" width="500" height="500"></canvas>
+    <br>
+    <div id=colorscontainer>
         <canvas class="colors" id="color0" width="80" height="80"></canvas>
         <canvas class="colors" id="color1" width="80" height="80"></canvas>
         <canvas class="colors" id="color2" width="80" height="80"></canvas>
         <canvas class="colors" id="color3" width="80" height="80"></canvas>
         <canvas class="colors" id="color4" width="80" height="80"></canvas>
-
     </div>
-    <script type="text/javascript" src="colorpicker.js"></script>
-    <link rel="stylesheet" type="text/css" href="colorpicker.css">
+    <br>
+    <canvas class="blender" id="blender" width="500" height="50"></canvas>
+
+</div>
+<script type="text/javascript" src="colorpicker.js"></script>
+<link rel="stylesheet" type="text/css" href="colorpicker.css">
+
 </html>
