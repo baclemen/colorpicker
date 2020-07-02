@@ -1,0 +1,16 @@
+{
+  "name": "colorpicker",
+  "version": "0.1",
+  "description": "",
+  "permissions": ["activeTab", "declarativeContent", "storage", "contextMenus"],
+  "manifest_version": 2,
+  "browser_action": {
+    "default_title": "colorpicker"
+  },
+  "content_scripts" : [{
+      "matches" : ["https://aggie.io/*"],
+      "css" : ["colorpicker.css"],
+      "js" : ["3rdParty/jquery-3.5.1.min.js", "colorpicker.js"],
+      "run_at" : "document_idle"
+    }]
+}

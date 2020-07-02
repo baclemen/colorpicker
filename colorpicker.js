@@ -1,3 +1,35 @@
+var pickerhtml = `
+<div id="colorpickercontainer">
+
+    <canvas id="drawcanvas" width="300" height="420"></canvas>
+	<div id="colorpickercontainer">
+
+		<canvas id="topslider" width="300" height="30"></canvas>
+		<canvas id="myCanvas" width="300" height="300"></canvas>
+		<div id=colorscontainer>
+			<canvas class="colors" id="color0" width="50" height="50"></canvas>
+			<canvas class="colors" id="color1" width="50" height="50"></canvas>
+			<canvas class="colors" id="color2" width="50" height="50"></canvas>
+			<canvas class="colors" id="color3" width="50" height="50"></canvas>
+			<canvas class="colors" id="color4" width="50" height="50"></canvas>
+		</div>
+		<canvas class="blender" id="blender" width="300" height="30"></canvas>
+
+
+</div>
+`
+
+
+// container = document.getElementsByClassName("editor-view")[0]
+// console.log(container.parentElement.childNodes)
+//container.firstChild.style.display = "none";
+//container.firstChild.style.display = "none";
+
+
+//container.parentElement.parentElement.childNodes[1].style.top = "450px";
+//container.parentElement.parentElement.childNodes[2].style.top = "670px";
+//container.parentElement.parentElement.style.width = "300px";
+
 
 
 var drawcanvas = document.getElementById("drawcanvas");
@@ -6,6 +38,12 @@ var drawctx = drawcanvas.getContext("2d");
 
 drawcanvas.addEventListener("gotpointercapture", startdrawing);
 drawcanvas.addEventListener("lostpointercapture", enddrawing);
+
+
+var otherels = document.getElementById("colorpickercontainer");
+
+
+
 
 drawcanvas.addEventListener("pointercancel", function(e){
     e.preventDefault();
@@ -17,20 +55,20 @@ const defaultpickercontext = {
     height : 1,
     width: 1,
     slidervalue: 1
-}
+};
 
 var pickercontext = defaultpickercontext;
 
 var c = document.getElementById("myCanvas");
-console.log(c)
+console.log(c);
 var ctx = c.getContext("2d");
-var dimx = 500;
-var dimy = 500;
-var heightslider = 25;
-var heightcolors = 88.5;
-var heightblender = 50;
+var dimx = 300;
+var dimy = 300;
+var heightslider = 30;
+var heightcolors = 55;
+var heightblender = 30;
 var imgData = ctx.createImageData(dimx, dimy);
-selectedcolor = 0;
+var selectedcolor = 0;
 var RGBcolor;
 initColorPicker();
 initColorChanger();
@@ -38,18 +76,20 @@ var sliderVal = 1;
 var zoomed = false;
 var zoomtrace = null;
 drawboard();
-var mouseflag;
+var mouseflag = false;
 initMouseFlag();
 var mousedownon = -1;
 var colors = [[255, 0, 0], [0, 255, 0], [0, 0, 255], [0, 0, 0], [255, 255, 255]];
-penstartctx =  -1;
-initsetcolors();
+var penstartctx =  -1;
+init();
 
-function initsetcolors(){
+function init(){
     for(var i = 0; i < colors.length; i++){
         setColor(colors[i],i)
     }
     chooseColor(0);
+    setBlender(colors[0],colors[1]);
+    setSlider(colors[1]);
 }
 
 
@@ -57,9 +97,9 @@ function initsetcolors(){
 function drawboard() {
     var s;
     for (var i = 0; i < dimx; i += 1) {
-        for (j = 0; j < dimy; j += 1) {
+        for (var j = 0; j < dimy; j += 1) {
 
-            pos = j * dimx * 4 + i * 4;
+            var pos = j * dimx * 4 + i * 4;
 
             var h = pickercontext.left + i / dimx * pickercontext.width;
             s = sliderVal;
@@ -100,7 +140,6 @@ function initColorPicker() {
 
             colors[selectedcolor] = rgba;
 
-            console.log(colors);
 
             //console.log("x" + mouseEvent.offsetX);
             //console.log("y" + mouseEvent.offsetY);
@@ -121,7 +160,7 @@ function initColorPicker() {
 
 function initColorChanger() {
     for (var i = 0; i < 5; i++) {
-        str = "color" + i
+        var str = "color" + i
         var palel = document.getElementById(str);
         palel.onclick = palelclick
 
@@ -143,7 +182,7 @@ function initColorChanger() {
 
 function startdrawing(event){
     console.log("startdrawing")
-    traceel = {
+    var traceel = {
         x: event.offsetX,
         y: event.offsetY
     };
@@ -176,13 +215,13 @@ function enddrawing(event){
     if(penstartctx == 1){
         if(isPolygon(pointertrace) && !zoomed){
             console.log(penstartctx)
-            pts = getsquarepoints(pointertrace)
+            var pts = getsquarepoints(pointertrace)
             
             var newpickercontext = {
-                left : pts[0].x / 500,
-                top : (pts[0].y - 25) / 500,
-                width : (pts[1].x - pts[0].x) / 500,
-                height: (pts[1].y - pts[0].y) / 500,
+                left : pts[0].x / dimx,
+                top : (pts[0].y - heightslider) / dimy,
+                width : (pts[1].x - pts[0].x) / dimx,
+                height: (pts[1].y - pts[0].y) / dimy,
                 slidervalue: 1
             }
 
@@ -217,7 +256,7 @@ function enddrawing(event){
             }
 
             else{
-                selectColorIfOnBoard(pointertrace[pointertrace.length - 1])
+                selectColorIfOnBoard(pointertrace[pointertrace.length - 1]);
             }
 
         }
@@ -226,10 +265,12 @@ function enddrawing(event){
         }
     }
     else if (penstartctx == 2){
-        pendown = eventOn(pointertrace[0]);
-        penup = eventOn(pointertrace[pointertrace.length-1]);
+
+        var pendown = eventOn(pointertrace[0]);
+        var penup = eventOn(pointertrace[pointertrace.length-1]);
+
         
-        if(penup == pendown){
+        if(penup == pendown && penup != -1){
             chooseColor(penup)
         }
 
@@ -238,19 +279,18 @@ function enddrawing(event){
             setBlender(colors[pendown], colors[penup])
         }
         else if (pendown >=0 && penup == -1){
-            lastel = pointertrace[pointertrace.length-1];
+            var lastel = pointertrace[pointertrace.length-1];
             if(lastel.y >= heightslider && lastel.y <= heightslider + dimx && lastel.x >= 0 && lastel.x <= dimy){
                 var imgData = ctx.getImageData(event.offsetX, event.offsetY - heightslider, 1, 1);
                 var rgb = imgData.data;
                 setBlender(colors[pendown],rgb);
             }
             else if (lastel.y >= heightslider + dimx + heightcolors && lastel.y <= heightslider + dimx + heightcolors + heightblender && lastel.x >= 0 && lastel.x <= dimy){
-                console.log("here")
-                blender = document.getElementById("blender");
+                var blender = document.getElementById("blender");
                 bctx = blender.getContext('2d');
                 var imgData = bctx.getImageData(event.offsetX, event.offsetY - heightslider - dimy - heightcolors, 1, 1);
                 var rgb = imgData.data
-                setBlender(colors.pendown,rgb);
+                setBlender(colors[pendown],rgb);
             }
         }
 
@@ -269,11 +309,11 @@ function enddrawing(event){
 }
 
 function logpointer(event){
-    traceel = {x: event.offsetX,
+    var traceel = {x: event.offsetX,
                 y: event.offsetY};
     
 
-    lastel = pointertrace[pointertrace.length-1];
+    var lastel = pointertrace[pointertrace.length-1];
 
     if (penstartctx == 0){
         if(traceel.x - lastel.x != 0){
@@ -292,7 +332,7 @@ function logpointer(event){
 
     } 
 
-    pointerpos = traceel;
+    var pointerpos = traceel;
     pointertrace.push(traceel); 
 
 }
@@ -300,13 +340,13 @@ function logpointer(event){
 
 function setColor(rgbcolor, number) {
     colors[number] = rgbcolor;
-    str = "color" + number;
+    var str = "color" + number;
     //console.log(str);
     var el = document.getElementById("color" + number);
     //console.log(el)
 
     var cctx = el.getContext("2d");
-    var colData = cctx.createImageData(80, 80);rgbcolor;
+    var colData = cctx.createImageData(50, 50);
 
     for (var i = 0; i < colData.data.length; i += 4) {
         colData.data[i + 0] = rgbcolor[0];
@@ -316,6 +356,9 @@ function setColor(rgbcolor, number) {
     }
     cctx.putImageData(colData, 0, 0);
     setSlider(rgbcolor);
+    //$("#color-input").val(rgbtohex(rgbcolor));
+
+
 }
 
 function setSlider(rgbcolor){
@@ -333,9 +376,9 @@ function setSlider(rgbcolor){
     var l = hslcolor[2];
 
 
-    for (var j = 0; j < 500; j++){
+    for (var j = 0; j < dimx; j++){
 
-        var s = j / 500;
+        var s = j / dimy;
         var rgb = hslToRgb(h, s, l);
 
         for (var i = 0; i < heightslider; i++){
@@ -349,6 +392,7 @@ function setSlider(rgbcolor){
 
         }
     }
+    console.log(sliderImgData)
     topsliderctx.putImageData(sliderImgData, 0, 0);
 }
 
@@ -360,16 +404,15 @@ function clearboard(){
 }
 
 function selectColorIfOnBoard(coordinates){
-    lastel = coordinates
+    var lastel = coordinates
     if(lastel.y >= heightslider && lastel.y <= heightslider + dimx && lastel.x >= 0 && lastel.x <= dimy){
         var imgData = ctx.getImageData(event.offsetX, event.offsetY - heightslider, 1, 1);
         var rgb = imgData.data
         setColor(rgb, selectedcolor)
     }
     else if (lastel.y >= heightslider + dimx + heightcolors && lastel.y <= heightslider + dimx + heightcolors + heightblender && lastel.x >= 0 && lastel.x <= dimy){
-        console.log("here")
-        blender = document.getElementById("blender");
-        bctx = blender.getContext('2d');
+        var blender = document.getElementById("blender");
+        var bctx = blender.getContext('2d');
         var imgData = bctx.getImageData(event.offsetX, event.offsetY - heightslider - dimy - heightcolors, 1, 1);
         var rgb = imgData.data
         setColor(rgb, selectedcolor)
@@ -378,8 +421,8 @@ function selectColorIfOnBoard(coordinates){
 }
 
 function setBlender(color1, color2) {
-    blender = document.getElementById("blender");
-    bctx = blender.getContext('2d');
+    var blender = document.getElementById("blender");
+    var bctx = blender.getContext('2d');
 
     var bleImgData = ctx.createImageData(dimx, dimy);
 
@@ -392,7 +435,7 @@ function setBlender(color1, color2) {
 
         for (var j = 0; j < 50; j++) {
 
-            pos = j * dimx * 4 + i * 4;
+            var pos = j * dimx * 4 + i * 4;
 
             bleImgData.data[pos + 0] = colorRGB[0];
             bleImgData.data[pos + 1] = colorRGB[1];
@@ -413,42 +456,118 @@ function updateSlider(slideAmount) {
     //console.log(slideAmount);
 }
 
-function initMouseFlag() {
+function initMouseFlag(e) {
 
-    document.onmousedown = function (mouseEvent) {
-        mouseflag = true;
+    document.addEventListener('contextmenu', event => event.preventDefault());
+
+
+    otherels.onpointerdown = function (e) {
+        e.preventDefault();
+
+        if(e.pointerType == 'mouse' && e.button == 2){
+            if(zoomed){
+                return
+            }
+            var traceel = {
+                x: e.offsetX,
+                y: e.offsetY
+            };
+            pointertrace.push(traceel);
+        }
+        else if(e.pointerType == 'mouse'){
+            startdrawing(e);
+        }
+
 
         //console.log(mouseflag);
 
-        logEl = mouseEvent.srcElement.id;
-        console.log(mouseEvent);
-        console.log(logEl.substring(0, 5));
-
-        if (logEl.substring(0, 5) == "color") {
-            console.log("logged");
-            mousedownon = logEl.match(/\d+/)[0];
-        }
-        else { }
     }
-    document.onmouseup = function (mouseEvent) {
-        mouseflag = false;
-        console.log(mouseflag);
+    otherels.onpointerup = function (e) {
+        e.preventDefault();
 
-        logEl = mouseEvent.srcElement.id;
-        console.log(logEl.substring(0, 5));
+        if(e.pointerType == 'mouse' && e.button == 2){
 
-        if (logEl.substring(0, 5) == "color") {
-
-            var mouseupon = logEl.match(/\d+/)[0];
-            if (mousedownon != -1 && mousedownon != mouseupon) {
-                setBlender(colors[mousedownon], colors[mouseupon]);
+            if(zoomed){
+                pickercontext = defaultpickercontext;
+                zoomtrace = [];
+                zoomed = false;
+                drawboard();
+                clearboard();
+                pointertrace=[];
+                return
             }
-        }
-        else {
+
+            var traceel = {
+                x: e.offsetX,
+                y: e.offsetY
+            };
+            pointertrace.push(traceel);
+
+            clearboard();
+            p1 = {x: pointertrace[0].x, y:pointertrace[0].y};
+            p2 = {x: pointertrace[0].x, y:pointertrace[pointertrace.length-1].y};
+            p3 = {x: pointertrace[pointertrace.length-1].x, y:pointertrace[pointertrace.length-1].y};
+            p4 = {x: pointertrace[pointertrace.length-1].x, y:pointertrace[0].y};
+            p5 = {x: pointertrace[0].x, y:pointertrace[0].y};
+            drawpolygon([p1,p2,p3,p4,p5]);
+
+            zoomtrace = [p1,p2,p3,p4,p5];
+
+            pts = [p1,p3];
+            
+            var newpickercontext = {
+                left : pts[0].x / dimx,
+                top : (pts[0].y - heightslider) / dimy,
+                width : (pts[1].x - pts[0].x) / dimx,
+                height: (pts[1].y - pts[0].y) / dimy,
+                slidervalue: 1
+            }
+
+            console.log(pts);
+
+            var newtrace = resizetrace(zoomtrace, newpickercontext);
+            zoomtrace = newtrace;
+            drawctx.clearRect(0, 0, drawcanvas.width, drawcanvas.height);
+
+            drawpolygon(zoomtrace);
+
+            pickercontext = newpickercontext;
+            drawboard();
+            zoomed = true;
+
+            pointertrace=[];
+
 
         }
-        mousedownon = -1;
+        else if(e.pointerType == 'mouse'){
+            enddrawing(e);
+        }
+        clearboard();
+        
+
     }
+
+    otherels.onpointermove = function(e) {
+
+        if(e.pointerType == 'mouse' && e.buttons == 2){
+            if(zoomed){
+                return
+            }
+            var traceel = {
+                x: e.offsetX,
+                y: e.offsetY
+            };
+            pointertrace.push(traceel);
+            clearboard();
+            p1 = {x: pointertrace[0].x, y:pointertrace[0].y};
+            p2 = {x: pointertrace[0].x, y:pointertrace[pointertrace.length-1].y};
+            p3 = {x: pointertrace[pointertrace.length-1].x, y:pointertrace[pointertrace.length-1].y};
+            p4 = {x: pointertrace[pointertrace.length-1].x, y:pointertrace[0].y};
+            p5 = {x: pointertrace[0].x, y:pointertrace[0].y};
+            drawpolygon([p1,p2,p3,p4,p5]);
+        }
+    }
+
 }
 
 function chooseColor(number){
@@ -482,13 +601,14 @@ function drawpolygon(trace){
 //pointertrace analysis
 
 function eventOn(coordinates){
-    for(var i = 0; i < 5; i++){
-        x = document.getElementById("color" + i);
-        pos = x.getBoundingClientRect();
 
-        middle = {x: pos.x + pos.width * .5, y: pos.y + pos.height * .5}
-        
-        if(absdifp(coordinates,middle) < pos.width / 2){
+    for(var i = 0; i < 5; i++){
+        var x = document.getElementById("color" + i);
+        var pos = x.offsetTop
+        middle = {x: x.offsetLeft + .5 * x.offsetWidth, y: x.offsetTop + .5 * x.offsetHeight + heightslider + dimy}
+
+        //var middle = {x: pos.x + pos.width * .5, y: pos.y + pos.height * .5}
+        if(absdifp(coordinates,middle) < x.offsetWidth / 2){
             return i;
         }
 
@@ -502,7 +622,7 @@ function isPolygon(trace){
         return false
     }
 
-    pts = getsquarepoints(trace);
+    var pts = getsquarepoints(trace);
 
 
     return absdifp(pts[0],pts[1]) > 6 * absdifp(trace[0], trace[trace.length-1]);
@@ -532,10 +652,10 @@ function getsquarepoints(trace ){
 }
 
 function resizetrace(trace, pctxt){
-    newtrace = [];
+    var newtrace = [];
     for(var i = 0; i < trace.length; i++){
-        var x = (trace[i].x - pctxt.left*500)/pctxt.width;
-        var y = (trace[i].y - pctxt.top*500 - heightslider) / pctxt.height + heightslider;
+        var x = (trace[i].x - pctxt.left*dimx)/pctxt.width;
+        var y = (trace[i].y - pctxt.top*dimy - heightslider) / pctxt.height + heightslider;
         newtrace.push({x: x, y: y})
     }
 
@@ -544,14 +664,14 @@ function resizetrace(trace, pctxt){
 }
 
 function intersects(p1, p2, p3, p4) {
-    a = p1.x;
-    b = p1.y;
-    c = p2.x;
-    d = p2.y;
-    p = p3.x;
-    q = p3.y;
-    r = p4.x;
-    s = p4.y;
+    var a = p1.x;
+    var b = p1.y;
+    var c = p2.x;
+    var d = p2.y;
+    var p = p3.x;
+    var q = p3.y;
+    var r = p4.x;
+    var s = p4.y;
 
     var det, gamma, lambda;
     det = (c - a) * (s - q) - (r - p) * (d - b);
@@ -592,7 +712,6 @@ function revbayes(color1, color2, percentage) {
     for (var i = 0; i < 3; i++) {
         retval[i] = Math.pow(color1[i], percentage) * Math.pow(color2[i], (1 - percentage));
     }
-    console.log(retval);
     return retval;
 }
 
@@ -669,9 +788,9 @@ function CmykToRgb(CMYK) {
 }
 
 function rgbToHsl(RGB){
-    r = RGB[0];
-    g = RGB[1];
-    b = RGB[2];
+    var r = RGB[0];
+    var g = RGB[1];
+    var b = RGB[2];
 
     r /= 255, g /= 255, b /= 255;
     var max = Math.max(r, g, b), min = Math.min(r, g, b);
@@ -693,4 +812,11 @@ function rgbToHsl(RGB){
     //return [Math.floor(h * 360), Math.floor(s * 100), Math.floor(l * 100)];
 
     return [h,s,l]
+}
+
+function rgbtohex(RGB){
+    var r = RGB[0];
+    var g = RGB[1];
+    var b = RGB[2];
+    return "#" + (Math.round(r) * 65536 + Math.round(g) * 256 + Math.round(b)).toString(16);
 }
