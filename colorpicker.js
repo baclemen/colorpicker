@@ -1,34 +1,104 @@
+if(typeof isextension !== 'undefined'){
+    console.log("isextension")
+}
+else {
+    console.log("isnotextension")
+}
+
+
 var pickerhtml = `
-<div id="colorpickercontainer">
-
-    <canvas id="drawcanvas" width="300" height="420"></canvas>
+<div id="colordragheader">
+	<div id="mydivheader">Click here to move</div>
 	<div id="colorpickercontainer">
+		<canvas id="drawcanvas" width="300" height="420"></canvas>
+		<div id="contentcontainer">
 
-		<canvas id="topslider" width="300" height="30"></canvas>
-		<canvas id="myCanvas" width="300" height="300"></canvas>
-		<div id=colorscontainer>
-			<canvas class="colors" id="color0" width="50" height="50"></canvas>
-			<canvas class="colors" id="color1" width="50" height="50"></canvas>
-			<canvas class="colors" id="color2" width="50" height="50"></canvas>
-			<canvas class="colors" id="color3" width="50" height="50"></canvas>
-			<canvas class="colors" id="color4" width="50" height="50"></canvas>
-		</div>
-		<canvas class="blender" id="blender" width="300" height="30"></canvas>
-
-
+			<canvas id="topslider" width="300" height="30"></canvas>
+			<canvas id="myCanvas" width="300" height="300"></canvas>
+			<div id=colorscontainer>
+				<canvas class="colors" id="color0" width="50" height="50"></canvas>
+				<canvas class="colors" id="color1" width="50" height="50"></canvas>
+				<canvas class="colors" id="color2" width="50" height="50"></canvas>
+				<canvas class="colors" id="color3" width="50" height="50"></canvas>
+				<canvas class="colors" id="color4" width="50" height="50"></canvas>
+			</div>
+			<canvas class="blender" id="blender" width="300" height="30"></canvas>
+	</div>
 </div>
 `
+var container;
+
+function setColorAPI(color){
+    if(typeof isextension !== 'undefined'){
+
+        console.log(rgbtohex(color));
+
+        var injectedCode = 'aww.setStrokeColor("'+ rgbtohex(color) +'")';
+        var script = document.createElement('script');
+        script.id = "injectedscript";
+        script.appendChild(document.createTextNode(injectedCode));
+        document.body.appendChild(script);
+
+        var element = document.getElementById("injectedscript");
+        console.log(element);
+        if(element != null){
+            element.parentNode.removeChild(element);
+        }
+    }
+
+}
+
+if(typeof isextension !== 'undefined'){
+    container = document.getElementById("board-menus");
+    container.innerHTML += pickerhtml;
+}
 
 
-// container = document.getElementsByClassName("editor-view")[0]
-// console.log(container.parentElement.childNodes)
-//container.firstChild.style.display = "none";
-//container.firstChild.style.display = "none";
 
 
-//container.parentElement.parentElement.childNodes[1].style.top = "450px";
-//container.parentElement.parentElement.childNodes[2].style.top = "670px";
-//container.parentElement.parentElement.style.width = "300px";
+
+dragElement(document.getElementById("colordragheader"));
+
+function dragElement(elmnt) {
+  var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+  if (document.getElementById("mydivheader")) {
+    /* if present, the header is where you move the DIV from:*/
+    document.getElementById("mydivheader").onmousedown = dragMouseDown;
+  } else {
+    /* otherwise, move the DIV from anywhere inside the DIV:*/
+    elmnt.onmousedown = dragMouseDown;
+  }
+
+  function dragMouseDown(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // get the mouse cursor position at startup:
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    document.onmouseup = closeDragElement;
+    // call a function whenever the cursor moves:
+    document.onmousemove = elementDrag;
+  }
+
+  function elementDrag(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // calculate the new cursor position:
+    pos1 = pos3 - e.clientX;
+    pos2 = pos4 - e.clientY;
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    // set the element's new position:
+    elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+    elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+  }
+
+  function closeDragElement() {
+    /* stop moving when mouse button is released:*/
+    document.onmouseup = null;
+    document.onmousemove = null;
+  }
+}
 
 
 
@@ -60,7 +130,7 @@ const defaultpickercontext = {
 var pickercontext = defaultpickercontext;
 
 var c = document.getElementById("myCanvas");
-console.log(c);
+//console.log(c);
 var ctx = c.getContext("2d");
 var dimx = 300;
 var dimy = 300;
@@ -189,7 +259,9 @@ function startdrawing(event){
     pointertrace.push(traceel); 
     drawcanvas.addEventListener("pointermove", logpointer);
 
-    if (traceel.y < heightslider){
+    console.log(traceel)
+
+    if (0 < traceel.y && traceel.y < heightslider){
         penstartctx = 0;
         updateSlider(traceel.x/5)
     } 
@@ -211,10 +283,10 @@ function enddrawing(event){
     console.log("enddrawing")
     //console.log(e.pressure)
     drawcanvas.removeEventListener("pointermove", logpointer);
-    console.log(pointertrace)
+    //console.log(pointertrace)
     if(penstartctx == 1){
         if(isPolygon(pointertrace) && !zoomed){
-            console.log(penstartctx)
+            //console.log(penstartctx)
             var pts = getsquarepoints(pointertrace)
             
             var newpickercontext = {
@@ -225,7 +297,7 @@ function enddrawing(event){
                 slidervalue: 1
             }
 
-            console.log(pts);
+            //console.log(pts);
 
             var newtrace = resizetrace(pointertrace, newpickercontext);
             zoomtrace = newtrace;
@@ -339,6 +411,7 @@ function logpointer(event){
 
 
 function setColor(rgbcolor, number) {
+    //this.aww.setStrokeColor(rgbtohex(rgbcolor));
     colors[number] = rgbcolor;
     var str = "color" + number;
     //console.log(str);
@@ -356,6 +429,7 @@ function setColor(rgbcolor, number) {
     }
     cctx.putImageData(colData, 0, 0);
     setSlider(rgbcolor);
+    setColorAPI(rgbcolor);
     //$("#color-input").val(rgbtohex(rgbcolor));
 
 
@@ -392,7 +466,7 @@ function setSlider(rgbcolor){
 
         }
     }
-    console.log(sliderImgData)
+    //console.log(sliderImgData)
     topsliderctx.putImageData(sliderImgData, 0, 0);
 }
 
@@ -458,7 +532,7 @@ function updateSlider(slideAmount) {
 
 function initMouseFlag(e) {
 
-    document.addEventListener('contextmenu', event => event.preventDefault());
+    drawcanvas.addEventListener('contextmenu', event => event.preventDefault());
 
 
     otherels.onpointerdown = function (e) {
@@ -523,7 +597,7 @@ function initMouseFlag(e) {
                 slidervalue: 1
             }
 
-            console.log(pts);
+            //console.log(pts);
 
             var newtrace = resizetrace(zoomtrace, newpickercontext);
             zoomtrace = newtrace;
@@ -577,8 +651,14 @@ function chooseColor(number){
     }
 
     selectedcolor = number;
+
     var x = document.getElementById("color" + number);
     x.style.border = "5px solid #000000";
+    console.log(colors)
+    console.log(selectedcolor);
+    console.log(colors[selectedcolor])
+    setColorAPI(colors[selectedcolor]);
+    //this.aww.setStrokeColor(rgbtohex(colors[number]));
 }
 
 
@@ -818,5 +898,17 @@ function rgbtohex(RGB){
     var r = RGB[0];
     var g = RGB[1];
     var b = RGB[2];
-    return "#" + (Math.round(r) * 65536 + Math.round(g) * 256 + Math.round(b)).toString(16);
+
+    r = r.toString(16);
+    g = g.toString(16);
+    b = b.toString(16);
+      
+    if (r.length == 1)
+      r = "0" + r;
+    if (g.length == 1)
+      g = "0" + g;
+    if (b.length == 1)
+      b = "0" + b;
+      
+    return "#" + r + g + b;
 }

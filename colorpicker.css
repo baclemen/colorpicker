@@ -3,6 +3,11 @@
  * See LICENSE in the project root for license information.
  */
 
+ #colorpickercontainer{
+    position: absolute;
+    z-index: 3000;
+ }
+
  #drawcanvas{
     position: absolute;
     z-index: 11;
@@ -26,6 +31,8 @@
 
 #colorscontainer{
     position: relative;
+    background-color: white;
+    margin-bottom: -4px;
 }
 
 [class="colors"]{
@@ -44,8 +51,30 @@
 #topslider {
     -webkit-appearance: none;
     outline: none;
+    margin-bottom: -4px;
   }
   
   #blender{
       position: relative;
+  }
+
+
+  #colordragheader {
+    all: revert;
+    width: 300;
+    position: fixed;
+    z-index: 100;
+    background-color: #f1f1f1;
+    text-align: center;
+    border: 1px solid #d3d3d3;
+    top: 100px;
+    left: 100px;
+  }
+  
+  #mydivheader {
+    width: 300PX;
+    cursor: move;
+    z-index: 10;
+    background-color: #2196F3;
+    color: #fff;
   }
